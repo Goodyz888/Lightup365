@@ -46,7 +46,9 @@ export const dict = {
     suggest3: "X39 Starters' Guide",
     suggest4: "Testimonials",
     resources: "Resources",
-    resourcesTitle: "Resources"
+    resourcesTitle: "Resources",
+    infoAlbumTitle: "Information Album",
+    infoAlbumDesc: "View more details and visual resources"
   },
   zh: {
     appTitle: "每日焕发 (Daily Radiance)",
@@ -95,6 +97,8 @@ export const dict = {
     suggest3: "X39 新手指南",
     suggest4: "用户见证",
     resources: "资源",
-    resourcesTitle: "资源"
+    resourcesTitle: "资源",
+    infoAlbumTitle: "信息相册",
+    infoAlbumDesc: "查看更多详情和视觉资源"
   }
 };

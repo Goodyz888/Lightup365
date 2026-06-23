@@ -17,12 +17,12 @@ export default function Quiz() {
     setSelectedGoals(prev => prev.includes(g) ? prev.filter(x => x !== g) : [...prev, g]);
   };
 
-  const goalsList: { id: Goal, label: string }[] = [
-    { id: 'pain', label: t.goalPain },
-    { id: 'sleep', label: t.goalSleep },
-    { id: 'energy', label: t.goalEnergy },
-    { id: 'antiAging', label: t.goalAntiAging },
-    { id: 'custom', label: t.goalCustom }
+  const goalsList: { id: Goal, label: string, emoji: string }[] = [
+    { id: 'pain', label: t.goalPain, emoji: "🤕" },
+    { id: 'sleep', label: t.goalSleep, emoji: "😴" },
+    { id: 'energy', label: t.goalEnergy, emoji: "⚡" },
+    { id: 'antiAging', label: t.goalAntiAging, emoji: "🌱" },
+    { id: 'custom', label: t.goalCustom, emoji: "✨" }
   ];
 
   const getRecommendations = () => {
@@ -45,8 +45,15 @@ export default function Quiz() {
       {step === 1 && (
         <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
           <div className="text-center space-y-4">
-            <h1 className="text-3xl font-bold">{t.quizTitle}</h1>
-            <p className="text-slate-600 dark:text-slate-400">{t.quizSubtitle}</p>
+            <h1 className="text-3xl md:text-4xl font-bold flex items-center justify-center gap-3 flex-wrap text-slate-900 dark:text-white">
+              <span className="animate-bounce hover:animate-spin cursor-default">✨</span>
+              <span className="relative overflow-hidden group">
+                <span className="relative z-10 transition-transform duration-500 group-hover:scale-105 inline-block">{t.quizTitle}</span>
+                <span className="absolute inset-0 bg-gradient-to-r from-transparent via-slate-400/30 dark:via-white/20 to-transparent -translate-x-full group-hover:animate-[shimmer_1.5s_infinite]"></span>
+              </span>
+              <span className="animate-bounce hover:animate-spin cursor-default" style={{ animationDelay: '0.2s' }}>🧬</span>
+            </h1>
+            <p className="text-slate-600 dark:text-slate-400 text-lg">{t.quizSubtitle}</p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -61,9 +68,12 @@ export default function Quiz() {
                 }`}
               >
                 <div className="flex items-center justify-between">
-                  <span className="font-medium text-lg">{g.label}</span>
+                  <div className="flex items-center space-x-4">
+                    <span className="text-3xl filter hover:drop-shadow-lg transition-all">{g.emoji}</span>
+                    <span className="font-medium text-lg text-slate-800 dark:text-slate-200">{g.label}</span>
+                  </div>
                   {selectedGoals.includes(g.id) && (
-                    <CheckCircle2 className="w-6 h-6 text-blue-500" />
+                    <CheckCircle2 className="w-6 h-6 text-blue-500 shrink-0 ml-4" />
                   )}
                 </div>
               </button>
@@ -99,7 +109,14 @@ export default function Quiz() {
       {step === 2 && (
         <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
           <div className="text-center space-y-4 mb-12">
-            <h2 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-teal-500 bg-clip-text text-transparent">{t.yourProtocol}</h2>
+            <h2 className="text-3xl md:text-4xl font-bold flex items-center justify-center gap-3 flex-wrap text-slate-900 dark:text-white">
+              <span className="animate-pulse cursor-default">💎</span>
+              <span className="relative overflow-hidden group">
+                <span className="relative z-10 transition-transform duration-500 group-hover:scale-105 inline-block">{t.yourProtocol}</span>
+                <span className="absolute inset-0 bg-gradient-to-r from-transparent via-slate-400/30 dark:via-white/20 to-transparent -translate-x-full group-hover:animate-[shimmer_1.5s_infinite]"></span>
+              </span>
+              <span className="animate-pulse cursor-default" style={{ animationDelay: '0.5s' }}>🛡️</span>
+            </h2>
             <p className="text-slate-600 dark:text-slate-400">Based on your goals, here are our recommended solutions.</p>
           </div>
 

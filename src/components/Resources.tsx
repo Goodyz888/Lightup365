@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useStore } from '../store';
 import { dict } from '../i18n';
-import { Video, PlayCircle } from 'lucide-react';
+import { Video, PlayCircle, ExternalLink, Image as ImageIcon } from 'lucide-react';
 
 const VIDEOS = [
   {
@@ -36,6 +36,30 @@ export default function Resources() {
       <h2 className="text-2xl md:text-3xl font-bold tracking-tight mb-8 text-center bg-gradient-to-br from-slate-900 to-slate-600 dark:from-white dark:to-slate-400 bg-clip-text text-transparent">
         {t.resourcesTitle}
       </h2>
+
+      <div className="mb-8">
+        <a 
+          href="https://photos.app.goo.gl/nigZ4qxsWkmTqJcP8" 
+          target="_blank" 
+          rel="noopener noreferrer"
+          className="flex items-center justify-between p-6 rounded-2xl bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 hover:from-blue-100 hover:to-indigo-100 dark:hover:from-blue-900/40 dark:hover:to-indigo-900/40 transition-all border border-blue-100 dark:border-blue-800/50 group"
+        >
+          <div className="flex items-center space-x-4">
+            <div className="p-3 bg-blue-500 text-white rounded-xl shadow-sm">
+              <ImageIcon className="w-6 h-6" />
+            </div>
+            <div>
+              <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                {t.infoAlbumTitle}
+              </h3>
+              <p className="text-sm text-slate-600 dark:text-slate-400">
+                {t.infoAlbumDesc}
+              </p>
+            </div>
+          </div>
+          <ExternalLink className="w-5 h-5 text-slate-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors" />
+        </a>
+      </div>
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {VIDEOS.map((video) => (
