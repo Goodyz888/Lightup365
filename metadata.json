@@ -1,0 +1,6 @@
+{
+  "name": "Daily Radiance",
+  "description": "LifeWave brand partner portal with multilingual AI search, interactive Patch Finder, and lead generation.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
