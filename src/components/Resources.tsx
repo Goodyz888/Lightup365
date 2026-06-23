@@ -23,6 +23,10 @@ const VIDEOS = [
   {
     id: "7Y3d74LQaT4",
     title: "Dr. Staci explains what each patch does!",
+  },
+  {
+    id: "Cy7Lt172Ifg",
+    title: "LifeWave Presentation",
   }
 ];
 

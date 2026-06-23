@@ -45,9 +45,9 @@ export default function Quiz() {
       {step === 1 && (
         <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
           <div className="text-center space-y-4">
-            <h1 className="text-3xl md:text-4xl font-bold flex items-center justify-center gap-3 flex-wrap text-slate-900 dark:text-white">
+            <h1 className="text-2xl md:text-3xl font-bold flex items-center justify-center gap-3 flex-wrap text-slate-900 dark:text-white mb-2">
               <span className="animate-bounce hover:animate-spin cursor-default">✨</span>
-              <span className="relative overflow-hidden group">
+              <span className="relative overflow-hidden group max-w-[14rem] sm:max-w-xs md:max-w-sm leading-snug">
                 <span className="relative z-10 transition-transform duration-500 group-hover:scale-105 inline-block">{t.quizTitle}</span>
                 <span className="absolute inset-0 bg-gradient-to-r from-transparent via-slate-400/30 dark:via-white/20 to-transparent -translate-x-full group-hover:animate-[shimmer_1.5s_infinite]"></span>
               </span>
@@ -109,9 +109,9 @@ export default function Quiz() {
       {step === 2 && (
         <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
           <div className="text-center space-y-4 mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold flex items-center justify-center gap-3 flex-wrap text-slate-900 dark:text-white">
+            <h2 className="text-2xl md:text-3xl font-bold flex items-center justify-center gap-3 flex-wrap text-slate-900 dark:text-white">
               <span className="animate-pulse cursor-default">💎</span>
-              <span className="relative overflow-hidden group">
+              <span className="relative overflow-hidden group max-w-[14rem] sm:max-w-xs md:max-w-sm leading-snug">
                 <span className="relative z-10 transition-transform duration-500 group-hover:scale-105 inline-block">{t.yourProtocol}</span>
                 <span className="absolute inset-0 bg-gradient-to-r from-transparent via-slate-400/30 dark:via-white/20 to-transparent -translate-x-full group-hover:animate-[shimmer_1.5s_infinite]"></span>
               </span>

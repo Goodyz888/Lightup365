@@ -44,8 +44,9 @@ export default function Home() {
         <div className="absolute top-0 right-0 p-8 opacity-10">
           <Sparkles className="w-48 h-48 text-blue-500" />
         </div>
-        <h1 className="text-3xl md:text-5xl font-bold tracking-tight mb-6 bg-gradient-to-br from-slate-900 to-slate-600 dark:from-white dark:to-slate-400 bg-clip-text text-transparent">
-          {t.heroTitle}
+        <h1 className="tracking-tight mb-8 flex flex-col items-center gap-3">
+          <span className="text-2xl md:text-3xl font-bold bg-gradient-to-br from-slate-900 to-slate-600 dark:from-white dark:to-slate-400 bg-clip-text text-transparent">{t.heroTitle}</span>
+          <span className="text-xl md:text-2xl font-medium bg-gradient-to-r from-blue-600 to-teal-500 bg-clip-text text-transparent">{t.heroTitle2}</span>
         </h1>
         <p className="text-lg md:text-xl text-slate-600 dark:text-slate-400 max-w-2xl mx-auto mb-10">
           {t.heroSubtitle}
@@ -53,18 +54,18 @@ export default function Home() {
       </section>
 
       {/* Resources Section */}
-      <section id="resources" className="w-full">
+      <section id="resources" className="w-full scroll-mt-24">
         <Resources />
         <div className="w-full h-px bg-gradient-to-r from-transparent via-slate-200 dark:via-slate-700 to-transparent my-8" />
       </section>
 
       {/* Quiz Section */}
-      <section id="quiz" className="w-full relative z-20">
+      <section id="quiz" className="w-full relative z-20 scroll-mt-24">
         <Quiz />
       </section>
 
       {/* AI Search Section */}
-      <section id="search" className="w-full">
+      <section id="search" className="w-full scroll-mt-24">
         <div className="w-full h-px bg-gradient-to-r from-transparent via-slate-200 dark:via-slate-700 to-transparent my-8" />
         <SearchPage />
         <div className="w-full h-px bg-gradient-to-r from-transparent via-slate-200 dark:via-slate-700 to-transparent my-8" />
