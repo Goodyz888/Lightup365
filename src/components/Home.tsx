@@ -4,6 +4,7 @@ import { dict } from '../i18n';
 import { Mail, Sparkles, Video, ArrowRight } from 'lucide-react';
 import SearchPage from './SearchPage';
 import Quiz from './Quiz';
+import Resources from './Resources';
 
 export default function Home() {
   const { language, socialUpdates } = useStore();
@@ -49,6 +50,12 @@ export default function Home() {
         <p className="text-lg md:text-xl text-slate-600 dark:text-slate-400 max-w-2xl mx-auto mb-10">
           {t.heroSubtitle}
         </p>
+      </section>
+
+      {/* Resources Section */}
+      <section id="resources" className="w-full">
+        <Resources />
+        <div className="w-full h-px bg-gradient-to-r from-transparent via-slate-200 dark:via-slate-700 to-transparent my-8" />
       </section>
 
       {/* Quiz Section */}

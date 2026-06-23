@@ -44,7 +44,9 @@ export const dict = {
     suggest1: "How does x39 work?",
     suggest2: "Phototherapy: Science and Studies",
     suggest3: "X39 Starters' Guide",
-    suggest4: "Testimonials"
+    suggest4: "Testimonials",
+    resources: "Resources",
+    resourcesTitle: "Resources"
   },
   zh: {
     appTitle: "每日焕发 (Daily Radiance)",
@@ -91,6 +93,8 @@ export const dict = {
     suggest1: "X39 是如何运作的？",
     suggest2: "光波疗法：科学与研究",
     suggest3: "X39 新手指南",
-    suggest4: "用户见证"
+    suggest4: "用户见证",
+    resources: "资源",
+    resourcesTitle: "资源"
   }
 };

@@ -2,7 +2,7 @@ import React from 'react';
 import { Link, Outlet } from 'react-router-dom';
 import { useStore } from '../store';
 import { dict } from '../i18n';
-import { Sun, Moon, Languages, Home, Search, ClipboardList, Shield } from 'lucide-react';
+import { Sun, Moon, Languages, Home, Search, ClipboardList, Shield, Video } from 'lucide-react';
 
 export default function Layout() {
   const { theme, toggleTheme, language, setLanguage } = useStore();
@@ -29,6 +29,9 @@ export default function Layout() {
               </a>
               <a href="/#quiz" className="flex items-center space-x-1 hover:text-blue-600 transition-colors">
                 <ClipboardList className="w-4 h-4" /> <span>{t.quiz}</span>
+              </a>
+              <a href="/#resources" className="flex items-center space-x-1 hover:text-blue-600 transition-colors">
+                <Video className="w-4 h-4" /> <span>{t.resources}</span>
               </a>
             </div>
 
@@ -66,6 +69,10 @@ export default function Layout() {
         <a href="/#quiz" className="flex flex-col items-center p-2 text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400">
           <ClipboardList className="w-5 h-5" />
           <span className="text-[10px] mt-1">{t.quiz}</span>
+        </a>
+        <a href="/#resources" className="flex flex-col items-center p-2 text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400">
+          <Video className="w-5 h-5" />
+          <span className="text-[10px] mt-1">{t.resources}</span>
         </a>
       </div>
 
