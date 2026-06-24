@@ -5,10 +5,6 @@ import { Video, PlayCircle, ExternalLink, Image as ImageIcon } from 'lucide-reac
 
 const VIDEOS = [
   {
-    id: "8mDjVAim-vA",
-    title: "萊威能量貼 教學篇 LifeWave Patching Tutorial by David Schmidt",
-  },
-  {
     id: "_m7bhYr2RLo",
     title: "Testimonials: Before and After",
   },
@@ -27,6 +23,10 @@ const VIDEOS = [
   {
     id: "Cy7Lt172Ifg",
     title: "LifeWave Presentation",
+  },
+  {
+    id: "8mDjVAim-vA",
+    title: "萊威能量貼 教學篇 LifeWave Patching Tutorial by David Schmidt",
   }
 ];
 

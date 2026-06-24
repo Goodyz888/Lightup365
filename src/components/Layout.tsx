@@ -82,16 +82,25 @@ export default function Layout() {
       </main>
 
       {/* Footer */}
-      <footer className="w-full bg-slate-100 dark:bg-slate-950 py-8 border-t border-slate-200 dark:border-slate-800 mb-16 md:mb-0">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-4">
-          <div className="text-sm text-slate-500 max-w-2xl flex items-start space-x-3">
-            <Shield className="w-6 h-6 flex-shrink-0 text-blue-500 mt-0.5" />
-            <p>{t.disclaimer}</p>
+      <footer className="w-full bg-slate-50 dark:bg-slate-950 py-12 border-t border-slate-200 dark:border-slate-800 mb-16 md:mb-0">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center md:items-start gap-8">
+          <div className="flex-1 bg-white dark:bg-slate-900 p-6 md:p-8 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm max-w-4xl">
+            <div className="flex items-start space-x-4">
+              <Shield className="w-8 h-8 md:w-10 md:h-10 flex-shrink-0 text-amber-500 mt-1" />
+              <div className="space-y-2">
+                <h3 className="text-lg font-bold text-slate-800 dark:text-slate-200 uppercase tracking-widest">Important Disclaimer</h3>
+                <p className="text-base md:text-lg leading-relaxed font-medium italic bg-gradient-to-r from-blue-600 to-teal-500 bg-clip-text text-transparent">{t.disclaimer}</p>
+              </div>
+            </div>
           </div>
-          <div className="text-xs text-slate-400 font-mono">
-            Contact: lightup365nz@gmail.com
-            <br />
-            <Link to="/admin" className="hover:underline">Admin</Link>
+          <div className="text-center md:text-right space-y-4 shrink-0 flex flex-col items-center md:items-end">
+            <h3 className="text-lg font-bold text-slate-800 dark:text-slate-200 uppercase tracking-widest">Get In Touch</h3>
+            <a href="mailto:lightup365nz@gmail.com" className="inline-flex items-center justify-center text-lg font-semibold bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors px-6 py-3 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm group">
+              <span className="bg-gradient-to-r from-blue-600 to-teal-500 group-hover:from-blue-500 group-hover:to-teal-400 bg-clip-text text-transparent transition-all">lightup365nz@gmail.com</span>
+            </a>
+            <div className="pt-4">
+              <Link to="/admin" className="text-xs text-slate-500 hover:text-slate-400 transition-colors uppercase tracking-widest font-bold">Admin Access</Link>
+            </div>
           </div>
         </div>
       </footer>

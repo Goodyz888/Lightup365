@@ -13,17 +13,22 @@ export const dict = {
     searchTitle: "Ask Our AI Knowledge Base",
     searchResults: "Results",
     noResults: "No results found. Try asking something else.",
-    quizTitle: "Your Personalized Wellness Protocol",
+    quizTitle: "Your Personalized Wellness Plan",
     quizSubtitle: "Select your primary health and wellness goals:",
     goalPain: "Pain Management & Relief",
     goalSleep: "Deep, Restorative Sleep",
     goalEnergy: "Athletic Performance & Energy",
-    goalAntiAging: "Cellular Anti-Aging & Rejuvenation",
+    goalAntiAging: "Cellular Anti-Aging & Repair",
+    goalDetox: "Detoxification & Immune Support",
+    goalStress: "Stress Relief & Mental Clarity",
+    goalWeight: "Weight Management & Metabolism",
+    goalMuscle: "Muscle, Bone & Joint Health",
+    goalSkin: "Skin Health & Glow",
     goalCustom: "Other (Please specify)",
     customGoalPlaceholder: "Type your specific wellness goal...",
     nextStep: "Next Step",
     getRecommendations: "Get Recommendations",
-    yourProtocol: "Your Personal Protocol",
+    yourProtocol: "Your Personalised Wellness Plan",
     buyNow: "Shop Now (Affiliate Link)",
     disclaimer: "Disclaimer: LifeWave products are wellness products designed to support overall health. They do not claim to cure, treat, diagnose, or prevent any medical condition or disease. Always consult with a healthcare professional.",
     leadMagnetTitle: "Get Our 7-Day Wellness Journey",
@@ -49,7 +54,72 @@ export const dict = {
     resources: "Resources",
     resourcesTitle: "Resources",
     infoAlbumTitle: "Information Album",
-    infoAlbumDesc: "View more details and visual resources"
+    infoAlbumDesc: "View more details and visual resources",
+    keyBenefits: "Key Benefits",
+    placementPoints: "Placement Points",
+    quizRecommendationSubtitle: "Based on your goals, here are our recommended solutions.",
+    patches: {
+      x39: {
+        name: "X39",
+        description: "Activates stem cells, resets cells to a younger, healthier state.",
+        benefits: ["Pain Relief", "Reduced Inflammation", "Energy", "Mental Clarity", "Wound Healing", "Anti-Aging"],
+        points: ["CV6 (Under belly button)", "GV14 (Base of neck)"]
+      },
+      x49: {
+        name: "X49",
+        description: "Promotes cardiovascular health, muscle growth, and bone density.",
+        benefits: ["Athletic Performance", "Muscle Recovery", "Fat Loss", "Bone Health", "Stamina"],
+        points: ["CV6 (Under belly button)", "GV14 (Base of neck)"]
+      },
+      aeon: {
+        name: "Y-Age Aeon",
+        description: "Clinically proven to reduce stress in the body and decrease inflammation.",
+        benefits: ["Stress Relief", "Inflammation Reduction", "Anti-Aging", "Relaxation", "Emotional Balance"],
+        points: ["GV14 (Base of neck)", "Right side of neck"]
+      },
+      icewave: {
+        name: "IceWave",
+        description: "Safe, natural pain relief. Can be used for whole body and local pain.",
+        benefits: ["Fast Pain Relief", "No Drugs", "Anti-inflammatory", "Meridian Balance"],
+        points: ["Clock/Cross Method on pain area", "Bottom of feet"]
+      },
+      silentnights: {
+        name: "Silent Nights",
+        description: "Clinically proven to improve quality and length of sleep without pills.",
+        benefits: ["Deep Sleep", "Increased Oxygen", "Reduced Snoring", "Natural Melatonin"],
+        points: ["Right Temple", "Third Eye", "Right Inside Ankle"]
+      },
+      alavida: {
+        name: "Alavida",
+        description: "Improves health of skin, naturally stimulates melatonin to improve sleep.",
+        benefits: ["Skin Rejuvenation", "Better Sleep", "Antioxidant Protection", "Skin Glow"],
+        points: ["Third Eye", "Right Temple", "Base of neck"]
+      },
+      carnosine: {
+        name: "Y-Age Carnosine",
+        description: "Supports cellular repair, delays tissue aging, and improves physical performance.",
+        benefits: ["Cellular Repair", "Tissue Anti-aging", "Brain & Heart Health", "Muscle Recovery"],
+        points: ["CV17 (Center of chest)", "CV6 (Under belly button)"]
+      },
+      energyenhancer: {
+        name: "Energy Enhancer",
+        description: "Clinically proven to increase energy, endurance, and stamina.",
+        benefits: ["Boosts Energy", "Fat Burning", "Reduces Lactic Acid", "Rapid Recovery"],
+        points: ["LU1 (Upper chest)", "ST36 (Below knee)", "K1 (Bottom of foot)"]
+      },
+      glutathione: {
+        name: "Y-Age Glutathione",
+        description: "Master antioxidant patch. Supports liver detoxification and immune system.",
+        benefits: ["Antioxidant Defense", "Detoxification", "Immune Support", "Heavy Metal Removal"],
+        points: ["CV6 (Under belly button)", "CV17 (Center of chest)", "LI4 (Hand webbing)"]
+      },
+      sp6: {
+        name: "SP6 Complete",
+        description: "Regulates appetite, supports healthy metabolism and hormonal balance.",
+        benefits: ["Appetite Control", "Hormonal Balance", "Healthy Metabolism", "Endocrine Stability"],
+        points: ["SP6 (Inside leg above ankle)", "ST36 (Below knee)"]
+      }
+    }
   },
   zh: {
     appTitle: "每日焕发 (Daily Radiance)",
@@ -70,7 +140,12 @@ export const dict = {
     goalPain: "疼痛管理与缓解",
     goalSleep: "深度恢复性睡眠",
     goalEnergy: "运动表现与精力",
-    goalAntiAging: "细胞抗衰老与活力重塑",
+    goalAntiAging: "细胞抗衰老与修复",
+    goalDetox: "排毒与免疫力支持",
+    goalStress: "缓解压力与精神清晰",
+    goalWeight: "体重管理与代谢平衡",
+    goalMuscle: "肌肉、骨骼与关节健康",
+    goalSkin: "皮肤健康与光泽",
     goalCustom: "其他 (请说明)",
     customGoalPlaceholder: "输入您的具体健康目标...",
     nextStep: "下一步",
@@ -101,6 +176,71 @@ export const dict = {
     resources: "资源",
     resourcesTitle: "资源",
     infoAlbumTitle: "信息相册",
-    infoAlbumDesc: "查看更多详情和视觉资源"
+    infoAlbumDesc: "查看更多详情和视觉资源",
+    keyBenefits: "主要特点",
+    placementPoints: "贴敷位置",
+    quizRecommendationSubtitle: "根据您的目标，以下是我们推荐的解决方案：",
+    patches: {
+      x39: {
+        name: "X39",
+        description: "激活干细胞，支持自然修复机制，促进伤口愈合、组织再生与抗衰老。",
+        benefits: ["缓解疼痛与炎症", "增强能量与注意力", "提升睡眠质量", "促进身体恢复", "无药物安全无副作用", "温和安全长效使用"],
+        points: ["CV6 (肚脐下方)", "GV14 (颈部大椎穴)"]
+      },
+      x49: {
+        name: "X49",
+        description: "激活干细胞，特别支持肌肉和骨骼健康，塑造健康体型。",
+        benefits: ["提升体能与耐力", "改善锻炼恢复速度", "有助于脂肪代谢", "加强心血管系统功能", "安全温和"],
+        points: ["CV6 (肚脐下方)", "GV14 (颈部大椎穴)"]
+      },
+      aeon: {
+        name: "Y-Age Aeon (消炎贴片)",
+        description: "舒缓压力，平衡情绪，调节炎症反应并减轻不适。",
+        benefits: ["舒缓压力", "平衡情绪", "调节炎症反应", "全天候使用", "安抚神经系统"],
+        points: ["GV14 (颈部大椎穴)", "颈部右侧"]
+      },
+      icewave: {
+        name: "IceWave (冰波贴片)",
+        description: "快速缓解各类疼痛，无药物成分，利用光波技术促进能量流通。",
+        benefits: ["快速缓解疼痛", "无药物且无成瘾性", "天然物理镇痛", "促进经络畅通"],
+        points: ["疼痛部位时钟/交叉贴法", "足底"]
+      },
+      silentnights: {
+        name: "Silent Nights (安睡贴片)",
+        description: "促进褪黑激素自然分泌，改善睡眠质量，无需药物。",
+        benefits: ["改善睡眠深度", "缓解入睡困难", "无药物安全作用", "提升整体睡眠质量"],
+        points: ["右侧太阳穴", "印堂 (两眉之间)", "右侧脚踝内侧"]
+      },
+      alavida: {
+        name: "Alavida (美肌贴片)",
+        description: "增强皮肤屏障，提升肤色光泽，同时刺激褪黑素分泌改善睡眠。",
+        benefits: ["抗氧化保护细胞", "改善睡眠质量", "延缓皮肤老化", "无药物温和安全"],
+        points: ["印堂 (两眉之间)", "右侧太阳穴", "颈部大椎穴"]
+      },
+      carnosine: {
+        name: "Y-Age Carnosine (肌肤贴片)",
+        description: "支持细胞修复与再生，保护大脑、心脏与肌肉健康。",
+        benefits: ["支持细胞修复", "延缓组织老化", "改善注意力与脑部清晰度", "缩短运动恢复时间"],
+        points: ["CV17 (胸部正中)", "CV6 (肚脐下方)"]
+      },
+      energyenhancer: {
+        name: "Energy Enhancer (能量贴片)",
+        description: "提升身体能量与耐力，快速恢复体力。",
+        benefits: ["激活脂肪燃烧", "支持细胞产能", "缓解运动酸痛", "提升体能"],
+        points: ["LU1 (上胸部)", "ST36 (膝盖下方足三里)", "K1 (足底涌泉穴)"]
+      },
+      glutathione: {
+        name: "Y-Age Glutathione (谷胱甘肽贴片)",
+        description: "强力抗氧化，支持肝脏排毒，帮助清除重金属与毒素。",
+        benefits: ["强力抗氧化", "支持肝脏排毒", "增强免疫力", "改善疲劳"],
+        points: ["CV6 (肚脐下方)", "CV17 (胸部正中)", "LI4 (手部虎口)"]
+      },
+      sp6: {
+        name: "SP6 Complete (代谢平衡贴片)",
+        description: "调节食欲，帮助控制饮食摄入，平衡内分泌系统。",
+        benefits: ["调节食欲", "平衡内分泌系统", "支持健康新陈代谢", "稳定荷尔蒙"],
+        points: ["SP6 (小腿内侧三阴交)", "ST36 (膝盖下方足三里)"]
+      }
+    }
   }
 };
