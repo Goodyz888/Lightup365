@@ -49,8 +49,7 @@ async function generateContentWithRetry(
         return response;
       }
     } catch (err: any) {
-      const errMsg = err.message || "Rate limited";
-      console.log(`[Gemini] Info: Model ${modelName} - Attempt ${i + 1} is busy or rate-limited: ${errMsg}`);
+      console.log(`[Gemini] Info: Model ${modelName} - Attempt ${i + 1} is temporarily busy or rate-limited. Retrying...`);
       const errStr = String(err.message || JSON.stringify(err) || "");
       
       const isOverloaded = 
@@ -112,8 +111,7 @@ async function generateContentWithSchemaFallback(
       return response;
     }
   } catch (err: any) {
-    const errMsg = err.message || "Rate limited";
-    console.log(`[Gemini] Info: Structured generation with schema is temporarily unavailable for ${modelName}: ${errMsg}`);
+    console.log(`[Gemini] Info: Structured generation with schema is temporarily unavailable for ${modelName}.`);
     const errStr = String(err.message || JSON.stringify(err) || "");
     
     // If the error was a 503 or other transient error, we shouldn't attempt the same model again immediately.
