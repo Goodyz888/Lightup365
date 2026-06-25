@@ -1,5 +1,6 @@
 import express from "express";
 import path from "path";
+import fs from "fs";
 import { createServer as createViteServer } from "vite";
 import { GoogleGenAI, Type } from "@google/genai";
 import dotenv from "dotenv";
@@ -246,11 +247,17 @@ async function startServer() {
   app.use(express.json());
 
   app.post("/api/ask", async (req, res) => {
+    const { query, language, knowledgeBase } = req.body;
     try {
-      const { query, language, knowledgeBase } = req.body;
-
       if (!query) {
         return res.status(400).json({ error: "Query is required" });
+      }
+
+      // If GEMINI_API_KEY is not defined, fail-safe immediately to local fallback
+      if (!process.env.GEMINI_API_KEY) {
+        console.warn("[Gemini] GEMINI_API_KEY not found. Falling back to local intelligence retrieval...");
+        const localResponse = generateLocalFallback(query, language, knowledgeBase);
+        return res.json(localResponse);
       }
 
       // Format knowledge base for the prompt
@@ -356,8 +363,13 @@ User Question: ${query}`;
 
       res.json({ answer: finalAnswer, summary: finalSummary });
     } catch (error: any) {
-      console.error("Gemini API Error:", error);
-      res.status(500).json({ error: error.message || "Failed to generate answer." });
+      console.error("Gemini API Error (Internal), falling back to local retrieval:", error);
+      try {
+        const localResponse = generateLocalFallback(query, language, knowledgeBase);
+        res.json(localResponse);
+      } catch (fallbackErr: any) {
+        res.status(500).json({ error: fallbackErr.message || "Failed to generate answer." });
+      }
     }
   });
 
@@ -494,8 +506,12 @@ Sent from Daily Radiance Partner Portal.
   });
 
 
-  // Vite middleware for development
-  if (process.env.NODE_ENV !== "production") {
+  // Serve static assets or fallback to Vite dev server
+  const distPath = path.join(process.cwd(), 'dist');
+  const hasBuiltApp = fs.existsSync(path.join(distPath, "index.html"));
+
+  if (process.env.NODE_ENV !== "production" || !hasBuiltApp) {
+    console.log("[Server] Starting in DEVELOPMENT mode using Vite dev server...");
     const vite = await createViteServer({
       server: { 
         middlewareMode: true,
@@ -505,7 +521,7 @@ Sent from Daily Radiance Partner Portal.
     });
     app.use(vite.middlewares);
   } else {
-    const distPath = path.join(process.cwd(), 'dist');
+    console.log(`[Server] Starting in PRODUCTION mode, serving static files from: ${distPath}`);
     app.use(express.static(distPath));
     app.get('*', (req, res) => {
       res.sendFile(path.join(distPath, 'index.html'));
