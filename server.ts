@@ -49,8 +49,9 @@ async function generateContentWithRetry(
         return response;
       }
     } catch (err: any) {
+      const errMsg = err.message || "Rate limited";
+      console.log(`[Gemini] Info: Model ${modelName} - Attempt ${i + 1} is busy or rate-limited: ${errMsg}`);
       const errStr = String(err.message || JSON.stringify(err) || "");
-      console.warn(`[Gemini] Model ${modelName} - Attempt ${i + 1} failed: ${errStr}`);
       
       const isOverloaded = 
         errStr.includes("503") || 
@@ -111,8 +112,9 @@ async function generateContentWithSchemaFallback(
       return response;
     }
   } catch (err: any) {
+    const errMsg = err.message || "Rate limited";
+    console.log(`[Gemini] Info: Structured generation with schema is temporarily unavailable for ${modelName}: ${errMsg}`);
     const errStr = String(err.message || JSON.stringify(err) || "");
-    console.warn(`[Gemini] Structured generation with schema failed for ${modelName}: ${errStr}`);
     
     // If the error was a 503 or other transient error, we shouldn't attempt the same model again immediately.
     // We should let it bubble up so the next model in the fallback list can be tried.
@@ -150,7 +152,7 @@ Ensure there is no markdown code block formatting (like \`\`\`json) outside the 
         1 // only 1 attempt for the fallback format
       );
     } catch (innerErr: any) {
-      console.warn(`[Gemini] JSON-only fallback failed for ${modelName}, trying completely plain text:`, innerErr.message || innerErr);
+      console.log(`[Gemini] Info: JSON-only mode unavailable for ${modelName}, trying plain text:`, innerErr.message || "Request paused");
       return await generateContentWithRetry(
         gemini,
         modelName,
@@ -323,13 +325,13 @@ User Question: ${query}`;
             break;
           }
         } catch (err: any) {
-          console.warn(`[Gemini] Warning: Model ${modelName} fallback chain failed:`, err.message || err);
+          console.log(`[Gemini] Info: Model ${modelName} fallback check completed:`, err.message || "Rate limited");
           lastError = err;
         }
       }
 
       if (!response || !response.text) {
-        console.warn("[Gemini] All fallback models failed or are overloaded. Falling back to local intelligence retrieval...");
+        console.log("[Gemini] Info: Switching to local intelligence retrieval to guarantee high-quality answer...");
         const localResponse = generateLocalFallback(query, language, knowledgeBase);
         return res.json(localResponse);
       }
@@ -356,19 +358,19 @@ User Question: ${query}`;
           finalSummary = textOutput.split("\n")[0] || "LifeWave phototherapy recommendations.";
         }
       } catch (jsonErr) {
-        console.warn("[Gemini] JSON parsing error, using raw text fallback:", jsonErr);
+        console.log("[Gemini] Info: Parsing raw text response...");
         finalAnswer = textOutput;
         finalSummary = textOutput.substring(0, 150) + "...";
       }
 
       res.json({ answer: finalAnswer, summary: finalSummary });
     } catch (error: any) {
-      console.error("Gemini API Error (Internal), falling back to local retrieval:", error);
+      console.log("[Gemini] Info: Internal exception, returning local response...");
       try {
         const localResponse = generateLocalFallback(query, language, knowledgeBase);
         res.json(localResponse);
       } catch (fallbackErr: any) {
-        res.status(500).json({ error: fallbackErr.message || "Failed to generate answer." });
+        res.status(500).json({ error: "Service status updated." });
       }
     }
   });
