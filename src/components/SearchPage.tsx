@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useStore } from '../store';
 import { dict } from '../i18n';
-import { Search, Bot, Loader2, Mic, MicOff, Volume2, Play, Pause, Square } from 'lucide-react';
+import { Search, Bot, Loader2, Mic, MicOff, Volume2, Play, Pause, Square, Sparkles } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 
 export default function SearchPage() {
@@ -9,6 +9,7 @@ export default function SearchPage() {
   const t = dict[language];
   const [query, setQuery] = useState('');
   const [answer, setAnswer] = useState('');
+  const [summary, setSummary] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   
@@ -131,6 +132,7 @@ export default function SearchPage() {
     setIsLoading(true);
     setError('');
     setAnswer('');
+    setSummary('');
     stopAudio();
     
     try {
@@ -140,11 +142,20 @@ export default function SearchPage() {
         body: JSON.stringify({ query: searchQuery, language: searchLang, knowledgeBase })
       });
       
-      const data = await res.json();
       if (!res.ok) {
-        throw new Error(data.error || 'Failed to fetch answer');
+        let errMsg = 'Failed to fetch answer';
+        try {
+          const errData = await res.json();
+          errMsg = errData.error || errMsg;
+        } catch (_) {
+          errMsg = `Server error (Status ${res.status})`;
+        }
+        throw new Error(errMsg);
       }
+      
+      const data = await res.json();
       setAnswer(data.answer);
+      setSummary(data.summary || '');
       if (autoPlay) {
         playAudio(data.answer, searchLang);
       }
@@ -310,6 +321,23 @@ export default function SearchPage() {
                 )}
               </div>
             </div>
+
+            {/* Concise Summary Card */}
+            {summary && (
+              <div className="p-5 rounded-2xl bg-teal-50/50 dark:bg-teal-950/20 border border-teal-100/80 dark:border-teal-900/40 mb-6 flex items-start gap-3.5 shadow-sm text-left animate-in fade-in duration-300">
+                <div className="p-2 bg-teal-500/10 dark:bg-teal-400/10 rounded-xl shrink-0 text-teal-600 dark:text-teal-400 mt-0.5">
+                  <Sparkles className="w-4 h-4 text-teal-600 dark:text-teal-400" />
+                </div>
+                <div>
+                  <h4 className="text-xs font-extrabold uppercase tracking-widest text-teal-700 dark:text-teal-400 mb-1">
+                    {language === 'zh' ? '智能摘要 / Quick Summary' : 'Quick Summary'}
+                  </h4>
+                  <p className="text-sm font-semibold text-slate-800 dark:text-slate-200 leading-relaxed">
+                    {summary}
+                  </p>
+                </div>
+              </div>
+            )}
 
             <div className="markdown-body prose prose-slate dark:prose-invert max-w-none text-slate-600 dark:text-slate-300 leading-relaxed">
               <ReactMarkdown>{answer}</ReactMarkdown>

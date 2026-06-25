@@ -1,21 +1,32 @@
 import express from "express";
 import path from "path";
 import { createServer as createViteServer } from "vite";
-import { GoogleGenAI } from "@google/genai";
+import { GoogleGenAI, Type } from "@google/genai";
 import dotenv from "dotenv";
 import nodemailer from "nodemailer";
 
 
 dotenv.config();
 
-const ai = new GoogleGenAI({
-  apiKey: process.env.GEMINI_API_KEY,
-  httpOptions: {
-    headers: {
-      'User-Agent': 'aistudio-build',
+let aiClient: GoogleGenAI | null = null;
+
+function getGeminiClient(): GoogleGenAI {
+  if (!aiClient) {
+    const key = process.env.GEMINI_API_KEY;
+    if (!key) {
+      throw new Error("GEMINI_API_KEY environment variable is required. Please add it via the Settings > Secrets panel.");
     }
+    aiClient = new GoogleGenAI({
+      apiKey: key,
+      httpOptions: {
+        headers: {
+          'User-Agent': 'aistudio-build',
+        }
+      }
+    });
   }
-});
+  return aiClient;
+}
 
 async function startServer() {
   const app = express();
@@ -46,19 +57,83 @@ Respond in the following language: ${language === 'zh' ? 'Chinese (Simplified)' 
 You have access to the following knowledge base:
 ${kbContext}
 
-Use this knowledge base to answer the user's question. If the answer is not in the knowledge base, answer based on your general knowledge about health, wellness, and LifeWave, but be helpful, professional, and do not make unsubstantiated medical claims. Emphasize that these are wellness products and not medical treatments. You can also provide resources and links if helpful. Use markdown for formatting.
+Use this knowledge base to answer the user's question. If the answer is not in the knowledge base, answer based on your general knowledge about health, wellness, and LifeWave, but be helpful, professional, and do not make unsubstantiated medical claims. Emphasize that these are wellness products and not medical treatments. You can also provide resources and links if helpful. Use markdown for formatting the detailed answer.
+
+Provide your response in a JSON structure containing:
+1. "summary": A concise, highly readable, 1-2 sentence quick summary of the key recommendations or patches.
+2. "answer": The full, detailed markdown-formatted comprehensive answer.
 
 User Question: ${query}`;
 
-      const response = await ai.models.generateContent({
-        model: "gemini-3.1-flash-lite-preview",
-        contents: prompt,
-        config: {
-            systemInstruction: "You are an expert AI advisor for LifeWave products. Provide clear, supportive, and informative answers. Always include the standard wellness disclaimer if giving health advice.",
-        }
-      });
+      const gemini = getGeminiClient();
+      const modelsToTry = [
+        "gemini-3.5-flash",
+        "gemini-3.1-flash-lite",
+        "gemini-flash-latest"
+      ];
 
-      res.json({ answer: response.text });
+      let response = null;
+      let lastError = null;
+
+      for (const modelName of modelsToTry) {
+        try {
+          console.log(`[Gemini] Attempting to generate structured content using model: ${modelName}`);
+          response = await gemini.models.generateContent({
+            model: modelName,
+            contents: prompt,
+            config: {
+              systemInstruction: "You are an expert AI advisor for LifeWave products. Provide clear, supportive, and informative answers in JSON format. Always include the standard wellness disclaimer if giving health advice.",
+              responseMimeType: "application/json",
+              responseSchema: {
+                type: Type.OBJECT,
+                properties: {
+                  summary: {
+                    type: Type.STRING,
+                    description: "A highly concise, 1-2 sentence quick summary of the key phototherapy patch recommendations and their main benefits.",
+                  },
+                  answer: {
+                    type: Type.STRING,
+                    description: "The full, detailed markdown-formatted answer answering the user's question, describing protocols, patch placements, and including standard wellness disclaimers.",
+                  }
+                },
+                required: ["summary", "answer"],
+              }
+            }
+          });
+          if (response && response.text) {
+            console.log(`[Gemini] Successfully generated structured content using model: ${modelName}`);
+            break;
+          }
+        } catch (err: any) {
+          console.warn(`[Gemini] Warning: Model ${modelName} failed or unavailable:`, err.message || err);
+          lastError = err;
+        }
+      }
+
+      if (!response || !response.text) {
+        throw lastError || new Error("All fallback models failed to generate content.");
+      }
+
+      let finalAnswer = "";
+      let finalSummary = "";
+
+      const textOutput = response.text.trim();
+      try {
+        if (textOutput.startsWith("{")) {
+          const parsed = JSON.parse(textOutput);
+          finalAnswer = parsed.answer || "";
+          finalSummary = parsed.summary || "";
+        } else {
+          finalAnswer = textOutput;
+          finalSummary = textOutput.split("\n")[0] || "LifeWave phototherapy recommendations.";
+        }
+      } catch (jsonErr) {
+        console.warn("[Gemini] JSON parsing error, using raw text fallback:", jsonErr);
+        finalAnswer = textOutput;
+        finalSummary = textOutput.substring(0, 150) + "...";
+      }
+
+      res.json({ answer: finalAnswer, summary: finalSummary });
     } catch (error: any) {
       console.error("Gemini API Error:", error);
       res.status(500).json({ error: error.message || "Failed to generate answer." });
