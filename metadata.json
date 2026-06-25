@@ -1,6 +1,6 @@
 {
   "name": "Daily Radiance",
-  "description": "LifeWave brand partner portal with multilingual AI search, interactive Patch Finder, and lead generation.",
-  "requestFramePermissions": [],
+  "description": "LifeWave brand partner portal with multilingual Phototherapy Wellness Advisor, interactive Patch Finder, and lead generation.",
+  "requestFramePermissions": ["microphone"],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

@@ -2,11 +2,70 @@ import React from 'react';
 import { Link, Outlet } from 'react-router-dom';
 import { useStore } from '../store';
 import { dict } from '../i18n';
-import { Sun, Moon, Languages, Home, Search, ClipboardList, Shield, Video } from 'lucide-react';
+import { Sun, Moon, Languages, Home, Search, ClipboardList, Shield, Video, HelpCircle } from 'lucide-react';
 
 export default function Layout() {
   const { theme, toggleTheme, language, setLanguage } = useStore();
   const t = dict[language];
+  const [activeSection, setActiveSection] = React.useState<string>('home');
+
+  React.useEffect(() => {
+    const handleScrollAndHash = () => {
+      const hash = window.location.hash;
+      if (hash === '#search') {
+        setActiveSection('search');
+      } else if (hash === '#quiz') {
+        setActiveSection('quiz');
+      } else if (hash === '#resources') {
+        setActiveSection('resources');
+      } else if (hash === '#faq_section') {
+        setActiveSection('faq');
+      } else if (hash === '#' || hash === '') {
+        setActiveSection('home');
+      }
+    };
+
+    window.addEventListener('hashchange', handleScrollAndHash);
+    // Also listen to scroll to update active menu items as user scrolls
+    const handleScroll = () => {
+      const sections = [
+        { id: 'resources', name: 'resources' },
+        { id: 'quiz', name: 'quiz' },
+        { id: 'faq_section', name: 'faq' },
+        { id: 'search', name: 'search' }
+      ];
+      
+      let found = false;
+      const viewportHeight = window.innerHeight;
+      const triggerPoint = viewportHeight * 0.35; // 35% from the top is perfect for detection
+      
+      for (const section of sections) {
+        const el = document.getElementById(section.id);
+        if (el) {
+          const rect = el.getBoundingClientRect();
+          if (rect.top <= triggerPoint && rect.bottom >= triggerPoint) {
+            setActiveSection(section.name);
+            found = true;
+            break;
+          }
+        }
+      }
+      if (!found) {
+        const scrollY = window.scrollY;
+        if (scrollY < 300) {
+          setActiveSection('home');
+        }
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    handleScrollAndHash(); // initial run
+
+    return () => {
+      window.removeEventListener('hashchange', handleScrollAndHash);
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, []);
 
   return (
     <div className={`min-h-screen bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-50 transition-colors flex flex-col font-sans`}>
@@ -20,18 +79,80 @@ export default function Layout() {
               </span>
             </div>
             
-            <div className="hidden md:flex flex-1 justify-center items-center space-x-8">
-              <a href="/#" className="flex items-center space-x-1 hover:text-blue-600 transition-colors">
-                <Home className="w-4 h-4" /> <span>{t.home}</span>
+            <div className="hidden md:flex flex-1 justify-center items-center space-x-1.5 lg:space-x-3">
+              <a 
+                href="/#" 
+                onClick={() => setActiveSection('home')}
+                className={`flex items-center space-x-1.5 px-3.5 py-2.5 rounded-xl text-sm transition-all duration-300 border ${
+                  activeSection === 'home'
+                    ? 'bg-gradient-to-r from-blue-500/10 to-teal-500/10 dark:from-blue-500/20 dark:to-teal-500/20 border-blue-200/50 dark:border-teal-800/40 shadow-sm shadow-blue-500/5 scale-[1.03]'
+                    : 'border-transparent text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-teal-400 hover:bg-slate-100/50 dark:hover:bg-slate-800/30'
+                }`}
+              >
+                <Home className={`w-4 h-4 transition-all duration-300 ${activeSection === 'home' ? 'scale-110 text-blue-600 dark:text-teal-400 drop-shadow-sm' : 'text-slate-400 dark:text-slate-500'}`} /> 
+                <span className={activeSection === 'home' ? 'bg-gradient-to-r from-blue-600 to-teal-500 dark:from-blue-400 dark:to-teal-300 bg-clip-text text-transparent font-extrabold' : 'font-semibold'}>
+                  {t.home}
+                </span>
               </a>
-              <a href="/#search" className="flex items-center space-x-1 hover:text-blue-600 transition-colors">
-                <Search className="w-4 h-4" /> <span>{t.search}</span>
+
+              <a 
+                href="/#resources" 
+                onClick={() => setActiveSection('resources')}
+                className={`flex items-center space-x-1.5 px-3.5 py-2.5 rounded-xl text-sm transition-all duration-300 border ${
+                  activeSection === 'resources'
+                    ? 'bg-gradient-to-r from-blue-500/10 to-teal-500/10 dark:from-blue-500/20 dark:to-teal-500/20 border-blue-200/50 dark:border-teal-800/40 shadow-sm shadow-blue-500/5 scale-[1.03]'
+                    : 'border-transparent text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-teal-400 hover:bg-slate-100/50 dark:hover:bg-slate-800/30'
+                }`}
+              >
+                <Video className={`w-4 h-4 transition-all duration-300 ${activeSection === 'resources' ? 'scale-110 text-blue-600 dark:text-teal-400 drop-shadow-sm' : 'text-slate-400 dark:text-slate-500'}`} /> 
+                <span className={activeSection === 'resources' ? 'bg-gradient-to-r from-blue-600 to-teal-500 dark:from-blue-400 dark:to-teal-300 bg-clip-text text-transparent font-extrabold' : 'font-semibold'}>
+                  {t.resources}
+                </span>
               </a>
-              <a href="/#quiz" className="flex items-center space-x-1 hover:text-blue-600 transition-colors">
-                <ClipboardList className="w-4 h-4" /> <span>{t.quiz}</span>
+
+              <a 
+                href="/#quiz" 
+                onClick={() => setActiveSection('quiz')}
+                className={`flex items-center space-x-1.5 px-3.5 py-2.5 rounded-xl text-sm transition-all duration-300 border ${
+                  activeSection === 'quiz'
+                    ? 'bg-gradient-to-r from-blue-500/10 to-teal-500/10 dark:from-blue-500/20 dark:to-teal-500/20 border-blue-200/50 dark:border-teal-800/40 shadow-sm shadow-blue-500/5 scale-[1.03]'
+                    : 'border-transparent text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-teal-400 hover:bg-slate-100/50 dark:hover:bg-slate-800/30'
+                }`}
+              >
+                <ClipboardList className={`w-4 h-4 transition-all duration-300 ${activeSection === 'quiz' ? 'scale-110 text-blue-600 dark:text-teal-400 drop-shadow-sm' : 'text-slate-400 dark:text-slate-500'}`} /> 
+                <span className={activeSection === 'quiz' ? 'bg-gradient-to-r from-blue-600 to-teal-500 dark:from-blue-400 dark:to-teal-300 bg-clip-text text-transparent font-extrabold' : 'font-semibold'}>
+                  {t.quiz}
+                </span>
               </a>
-              <a href="/#resources" className="flex items-center space-x-1 hover:text-blue-600 transition-colors">
-                <Video className="w-4 h-4" /> <span>{t.resources}</span>
+
+              <a 
+                href="/#faq_section" 
+                onClick={() => setActiveSection('faq')}
+                className={`flex items-center space-x-1.5 px-3.5 py-2.5 rounded-xl text-sm transition-all duration-300 border ${
+                  activeSection === 'faq'
+                    ? 'bg-gradient-to-r from-blue-500/10 to-teal-500/10 dark:from-blue-500/20 dark:to-teal-500/20 border-blue-200/50 dark:border-teal-800/40 shadow-sm shadow-blue-500/5 scale-[1.03]'
+                    : 'border-transparent text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-teal-400 hover:bg-slate-100/50 dark:hover:bg-slate-800/30'
+                }`}
+              >
+                <HelpCircle className={`w-4 h-4 transition-all duration-300 ${activeSection === 'faq' ? 'scale-110 text-blue-600 dark:text-teal-400 drop-shadow-sm' : 'text-slate-400 dark:text-slate-500'}`} /> 
+                <span className={activeSection === 'faq' ? 'bg-gradient-to-r from-blue-600 to-teal-500 dark:from-blue-400 dark:to-teal-300 bg-clip-text text-transparent font-extrabold' : 'font-semibold'}>
+                  {t.faq}
+                </span>
+              </a>
+
+              <a 
+                href="/#search" 
+                onClick={() => setActiveSection('search')}
+                className={`flex items-center space-x-1.5 px-3.5 py-2.5 rounded-xl text-sm transition-all duration-300 border ${
+                  activeSection === 'search'
+                    ? 'bg-gradient-to-r from-blue-500/10 to-teal-500/10 dark:from-blue-500/20 dark:to-teal-500/20 border-blue-200/50 dark:border-teal-800/40 shadow-sm shadow-blue-500/5 scale-[1.03]'
+                    : 'border-transparent text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-teal-400 hover:bg-slate-100/50 dark:hover:bg-slate-800/30'
+                }`}
+              >
+                <Search className={`w-4 h-4 transition-all duration-300 ${activeSection === 'search' ? 'scale-110 text-blue-600 dark:text-teal-400 drop-shadow-sm' : 'text-slate-400 dark:text-slate-500'}`} /> 
+                <span className={activeSection === 'search' ? 'bg-gradient-to-r from-blue-600 to-teal-500 dark:from-blue-400 dark:to-teal-300 bg-clip-text text-transparent font-extrabold' : 'font-semibold'}>
+                  {t.search}
+                </span>
               </a>
             </div>
 
@@ -57,22 +178,56 @@ export default function Layout() {
       </nav>
 
       {/* Mobile nav bottom */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 flex justify-around p-3">
-        <a href="/#" className="flex flex-col items-center p-2 text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400">
-          <Home className="w-5 h-5" />
-          <span className="text-[10px] mt-1">{t.home}</span>
+      <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-t border-slate-200 dark:border-slate-800 flex justify-around p-2.5 shadow-lg">
+        <a 
+          href="/#" 
+          onClick={() => setActiveSection('home')}
+          className="flex flex-col items-center p-1.5 rounded-xl transition-all duration-300"
+        >
+          <Home className={`w-5 h-5 transition-all duration-300 ${activeSection === 'home' ? 'text-blue-600 dark:text-teal-400 scale-110 drop-shadow-sm' : 'text-slate-400 dark:text-slate-500'}`} />
+          <span className={`text-[9px] mt-1 transition-all duration-300 ${activeSection === 'home' ? 'bg-gradient-to-r from-blue-600 to-teal-500 dark:from-blue-400 dark:to-teal-300 bg-clip-text text-transparent font-extrabold' : 'text-slate-500 dark:text-slate-400 font-medium'}`}>
+            {t.home}
+          </span>
         </a>
-        <a href="/#search" className="flex flex-col items-center p-2 text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400">
-          <Search className="w-5 h-5" />
-          <span className="text-[10px] mt-1">{t.search}</span>
+        <a 
+          href="/#resources" 
+          onClick={() => setActiveSection('resources')}
+          className="flex flex-col items-center p-1.5 rounded-xl transition-all duration-300"
+        >
+          <Video className={`w-5 h-5 transition-all duration-300 ${activeSection === 'resources' ? 'text-blue-600 dark:text-teal-400 scale-110 drop-shadow-sm' : 'text-slate-400 dark:text-slate-500'}`} />
+          <span className={`text-[9px] mt-1 transition-all duration-300 ${activeSection === 'resources' ? 'bg-gradient-to-r from-blue-600 to-teal-500 dark:from-blue-400 dark:to-teal-300 bg-clip-text text-transparent font-extrabold' : 'text-slate-500 dark:text-slate-400 font-medium'}`}>
+            {t.resources}
+          </span>
         </a>
-        <a href="/#quiz" className="flex flex-col items-center p-2 text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400">
-          <ClipboardList className="w-5 h-5" />
-          <span className="text-[10px] mt-1">{t.quiz}</span>
+        <a 
+          href="/#quiz" 
+          onClick={() => setActiveSection('quiz')}
+          className="flex flex-col items-center p-1.5 rounded-xl transition-all duration-300"
+        >
+          <ClipboardList className={`w-5 h-5 transition-all duration-300 ${activeSection === 'quiz' ? 'text-blue-600 dark:text-teal-400 scale-110 drop-shadow-sm' : 'text-slate-400 dark:text-slate-500'}`} />
+          <span className={`text-[9px] mt-1 transition-all duration-300 ${activeSection === 'quiz' ? 'bg-gradient-to-r from-blue-600 to-teal-500 dark:from-blue-400 dark:to-teal-300 bg-clip-text text-transparent font-extrabold' : 'text-slate-500 dark:text-slate-400 font-medium'}`}>
+            {t.quiz}
+          </span>
         </a>
-        <a href="/#resources" className="flex flex-col items-center p-2 text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400">
-          <Video className="w-5 h-5" />
-          <span className="text-[10px] mt-1">{t.resources}</span>
+        <a 
+          href="/#faq_section" 
+          onClick={() => setActiveSection('faq')}
+          className="flex flex-col items-center p-1.5 rounded-xl transition-all duration-300"
+        >
+          <HelpCircle className={`w-5 h-5 transition-all duration-300 ${activeSection === 'faq' ? 'text-blue-600 dark:text-teal-400 scale-110 drop-shadow-sm' : 'text-slate-400 dark:text-slate-500'}`} />
+          <span className={`text-[9px] mt-1 transition-all duration-300 ${activeSection === 'faq' ? 'bg-gradient-to-r from-blue-600 to-teal-500 dark:from-blue-400 dark:to-teal-300 bg-clip-text text-transparent font-extrabold' : 'text-slate-500 dark:text-slate-400 font-medium'}`}>
+            {t.faq}
+          </span>
+        </a>
+        <a 
+          href="/#search" 
+          onClick={() => setActiveSection('search')}
+          className="flex flex-col items-center p-1.5 rounded-xl transition-all duration-300"
+        >
+          <Search className={`w-5 h-5 transition-all duration-300 ${activeSection === 'search' ? 'text-blue-600 dark:text-teal-400 scale-110 drop-shadow-sm' : 'text-slate-400 dark:text-slate-500'}`} />
+          <span className={`text-[9px] mt-1 transition-all duration-300 ${activeSection === 'search' ? 'bg-gradient-to-r from-blue-600 to-teal-500 dark:from-blue-400 dark:to-teal-300 bg-clip-text text-transparent font-extrabold' : 'text-slate-500 dark:text-slate-400 font-medium'}`}>
+            {t.search}
+          </span>
         </a>
       </div>
 
