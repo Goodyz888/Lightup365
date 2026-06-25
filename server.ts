@@ -28,6 +28,217 @@ function getGeminiClient(): GoogleGenAI {
   return aiClient;
 }
 
+async function generateContentWithRetry(
+  gemini: GoogleGenAI,
+  modelName: string,
+  prompt: string,
+  config: any,
+  maxRetries = 3
+): Promise<any> {
+  let delay = 500; // start with 500ms delay
+  for (let i = 0; i < maxRetries; i++) {
+    try {
+      console.log(`[Gemini] Model ${modelName} - Attempt ${i + 1}/${maxRetries}`);
+      const response = await gemini.models.generateContent({
+        model: modelName,
+        contents: prompt,
+        config: config,
+      });
+      if (response && response.text) {
+        return response;
+      }
+    } catch (err: any) {
+      const errStr = String(err.message || JSON.stringify(err) || "");
+      console.warn(`[Gemini] Model ${modelName} - Attempt ${i + 1} failed: ${errStr}`);
+      
+      const isOverloaded = 
+        errStr.includes("503") || 
+        errStr.includes("UNAVAILABLE") || 
+        errStr.includes("429") || 
+        errStr.includes("RESOURCE_EXHAUSTED") || 
+        errStr.includes("high demand");
+
+      const isTransient = 
+        isOverloaded ||
+        errStr.includes("fetch failed") ||
+        errStr.includes("temporary");
+        
+      if (isOverloaded) {
+        // If the model is overloaded or rate limited, immediately fail-fast so the outer loop tries another model
+        throw err;
+      }
+        
+      if (!isTransient && i === 0) {
+        // If it is a hard client/config/model-name error (e.g. 404), throw immediately to switch models
+        throw err;
+      }
+      
+      if (i < maxRetries - 1) {
+        console.log(`[Gemini] Waiting ${delay}ms before retrying ${modelName}...`);
+        await new Promise((resolve) => setTimeout(resolve, delay));
+        delay *= 2; // exponential backoff
+      } else {
+        throw err;
+      }
+    }
+  }
+}
+
+async function generateContentWithSchemaFallback(
+  gemini: GoogleGenAI,
+  modelName: string,
+  prompt: string,
+  systemInstruction: string,
+  schema: any,
+  maxRetries = 3
+): Promise<any> {
+  // Try 1: With Structured JSON Schema
+  try {
+    console.log(`[Gemini] Attempting structured generation with schema for model: ${modelName}`);
+    const response = await generateContentWithRetry(
+      gemini,
+      modelName,
+      prompt,
+      {
+        systemInstruction: systemInstruction,
+        responseMimeType: "application/json",
+        responseSchema: schema,
+      },
+      maxRetries
+    );
+    if (response && response.text) {
+      return response;
+    }
+  } catch (err: any) {
+    const errStr = String(err.message || JSON.stringify(err) || "");
+    console.warn(`[Gemini] Structured generation with schema failed for ${modelName}: ${errStr}`);
+    
+    // If the error was a 503 or other transient error, we shouldn't attempt the same model again immediately.
+    // We should let it bubble up so the next model in the fallback list can be tried.
+    const isTransient = 
+      errStr.includes("503") || 
+      errStr.includes("UNAVAILABLE") || 
+      errStr.includes("429") || 
+      errStr.includes("RESOURCE_EXHAUSTED") || 
+      errStr.includes("high demand") || 
+      errStr.includes("fetch failed") ||
+      errStr.includes("temporary");
+
+    if (isTransient) {
+      throw err;
+    }
+    
+    // Otherwise, try without schema (as plain JSON or plain text)
+    console.log(`[Gemini] Retrying model ${modelName} WITHOUT schema parameters...`);
+    const plainPrompt = `${prompt}\n\nIMPORTANT: You must return your response as a valid JSON object matching this schema:
+{
+  "summary": "A highly concise 1-2 sentence quick summary",
+  "answer": "The full detailed markdown-formatted answer"
+}
+Ensure there is no markdown code block formatting (like \`\`\`json) outside the JSON, just return raw JSON text.`;
+
+    try {
+      return await generateContentWithRetry(
+        gemini,
+        modelName,
+        plainPrompt,
+        {
+          systemInstruction: systemInstruction,
+          responseMimeType: "application/json",
+        },
+        1 // only 1 attempt for the fallback format
+      );
+    } catch (innerErr: any) {
+      console.warn(`[Gemini] JSON-only fallback failed for ${modelName}, trying completely plain text:`, innerErr.message || innerErr);
+      return await generateContentWithRetry(
+        gemini,
+        modelName,
+        plainPrompt,
+        {
+          systemInstruction: systemInstruction,
+        },
+        1
+      );
+    }
+  }
+}
+
+function generateLocalFallback(query: string, language: string, knowledgeBase: any[]) {
+  const isZh = language === 'zh';
+  const normQuery = query.toLowerCase();
+
+  // Find relevant entries
+  const kbList = Array.isArray(knowledgeBase) ? knowledgeBase : [];
+  const relevantEntries = kbList.filter((k: any) => {
+    if (k.lang && k.lang !== language) return false;
+    const titleMatch = k.title && k.title.toLowerCase().includes(normQuery);
+    const contentMatch = k.content && k.content.toLowerCase().includes(normQuery);
+    const tagMatch = k.tags && k.tags.some((t: string) => normQuery.includes(t.toLowerCase()) || t.toLowerCase().includes(normQuery));
+    return titleMatch || contentMatch || tagMatch;
+  });
+
+  let summary = "";
+  let answer = "";
+
+  const disclaimer = isZh 
+    ? "\n\n---\n\n*免责声明：LifeWave 贴片是健康保健产品，不用于诊断、治疗、治愈或预防任何疾病。在开始任何光波疗法方案之前，请咨询您的医疗保健专业人员。*"
+    : "\n\n---\n\n*Disclaimer: LifeWave patches are wellness products and are not intended to diagnose, treat, cure, or prevent any disease. Always consult your healthcare professional before starting any phototherapy protocol.*";
+
+  if (relevantEntries.length > 0) {
+    if (isZh) {
+      summary = `已根据您的提问为您找到关于以下产品/科学的说明：${relevantEntries.map(e => e.title).join("、")}。这些产品能通过光疗促进身体自我调节。`;
+      
+      answer = `### 智能顾问本地检索结果\n\n您好！目前云端智能分析服务正处于高负荷状态，已为您切换至本地知识库检索。以下是为您匹配到的 LifeWave 核心解答：\n\n`;
+      relevantEntries.forEach((entry: any) => {
+        answer += `#### ${entry.title}\n\n${entry.content}\n\n`;
+      });
+      answer += `#### 建议与贴敷指引\n\n- **X39 贴片**：可贴在 CV6（肚脐下方两指宽）或 GV14（大颈椎底部）。\n- **Aeon 抗压贴**：建议贴在 GV14 或右侧太冲穴，有助于舒缓压力和减轻发炎。\n- **IceWave 止痛贴**：可贴在疼痛部位（白色贴右侧，棕色贴左侧或痛点中心）。\n\n请多喝水以促进光疗效果。`;
+    } else {
+      summary = `Based on your query, we retrieved info on ${relevantEntries.map(e => e.title).join(", ")}. These phototherapy patches use light reflection to support biological health.`;
+      
+      answer = `### Wellness Advisor Local Retrieval\n\nHello! The AI Cloud service is currently experiencing very high demand. I have automatically retrieved the most relevant information from our local LifeWave Knowledge Base for you:\n\n`;
+      relevantEntries.forEach((entry: any) => {
+        answer += `#### ${entry.title}\n\n${entry.content}\n\n`;
+      });
+      answer += `#### Recommended Placements & Usage\n\n- **X39 Stem Cell Activation**: Place GV14 (base of the neck) or CV6 (two inches below the belly button) in the morning.\n- **Y-Age Aeon**: Place at GV14 or on the right side of the body. Great for reducing inflammation and stress.\n- **IceWave**: Use the Tan patch on the localized pain point, and the White patch to the right or around the area (Clock/Cross Method).\n\nRemember to stay well hydrated to maximize the phototherapy benefits.`;
+    }
+  } else {
+    // General match-all fallback
+    if (isZh) {
+      summary = "LifeWave 采用先进的光疗科技，通过贴片反射特定光波来活化干细胞、缓解疼痛与释放压力。";
+      answer = `### 智能顾问常见解答\n\n您好！目前服务繁忙，这里是为您准备的 LifeWave 产品快速概览：\n\n` +
+        `#### 🌟 核心产品 X39\n` +
+        `LifeWave X39 贴片是核心产品，经临床验证能够提升体内的 GHK-Cu 铜肽，从而激活您自身的干细胞。它能带来以下益处：\n` +
+        `- 快速缓解痛楚与酸痛\n` +
+        `- 减少身体炎症，促进伤口愈合\n` +
+        `- 提升能量、精力和睡眠质量\n` +
+        `**贴敷位置**：GV14（大椎穴，低头时颈部最突出的骨头处）或 CV6（气海穴，肚脐下方两指宽）。每天早上贴一片，12小时后撕下，多喝水。\n\n` +
+        `#### 🛡️ 抗压与发炎 (Aeon)\n` +
+        `Y-Age Aeon 贴片专注于舒缓自主神经系统，减轻压力，平衡身体并减少发炎症状，是抗衰老的关键搭配。\n\n` +
+        `#### ❄️ 快速止痛 (IceWave)\n` +
+        `IceWave 使用一白一棕的双贴疗法。白色贴片贴在痛点右侧或上方，棕色贴片直接贴在最痛的点上，能快速打通微循环以消痛。`;
+    } else {
+      summary = "LifeWave uses advanced phototherapy patches to reflect specific wavelengths of light, promoting stem cell activation, pain relief, and stress reduction.";
+      answer = `### Wellness Advisor General FAQ\n\nHello! Since our cloud model is busy right now, here is a helpful overview of LifeWave's phototherapy technology and most recommended products:\n\n` +
+        `#### 🌟 Flagship Product: LifeWave X39\n` +
+        `The X39 patch is clinically proven to elevate GHK-Cu copper peptide, activating your body's own stem cells. Key benefits include:\n` +
+        `- Fast pain relief and inflammation reduction\n` +
+        `- Support for rapid wound healing\n` +
+        `- Enhanced energy, vitality, and deep restful sleep\n` +
+        `**Placement**: Apply in the morning either at **GV14** (the bump at the base of the neck) or **CV6** (two inches below the navel). Leave on for 12 hours, then remove and discard. Stay hydrated.\n\n` +
+        `#### 🛡️ Stress & Inflammation (Aeon)\n` +
+        `The Y-Age Aeon patch balances the autonomic nervous system, promoting deep relaxation and cooling down systemic inflammation, which is vital for cellular longevity.\n\n` +
+        `#### ❄️ Specialized Pain Relief (IceWave)\n` +
+        `IceWave uses a dual-patch configuration (Tan & White). Place the Tan patch directly on the pain center, and the White patch to the right of it or clock-style around it to clear bio-electrical pain pathways.`;
+    }
+  }
+
+  return {
+    summary,
+    answer: answer + disclaimer
+  };
+}
+
 async function startServer() {
   const app = express();
   const PORT = 3000;
@@ -69,7 +280,8 @@ User Question: ${query}`;
       const modelsToTry = [
         "gemini-3.5-flash",
         "gemini-3.1-flash-lite",
-        "gemini-flash-latest"
+        "gemini-flash-latest",
+        "gemini-3.1-pro-preview"
       ];
 
       let response = null;
@@ -77,41 +289,42 @@ User Question: ${query}`;
 
       for (const modelName of modelsToTry) {
         try {
-          console.log(`[Gemini] Attempting to generate structured content using model: ${modelName}`);
-          response = await gemini.models.generateContent({
-            model: modelName,
-            contents: prompt,
-            config: {
-              systemInstruction: "You are an expert AI advisor for LifeWave products. Provide clear, supportive, and informative answers in JSON format. Always include the standard wellness disclaimer if giving health advice.",
-              responseMimeType: "application/json",
-              responseSchema: {
-                type: Type.OBJECT,
-                properties: {
-                  summary: {
-                    type: Type.STRING,
-                    description: "A highly concise, 1-2 sentence quick summary of the key phototherapy patch recommendations and their main benefits.",
-                  },
-                  answer: {
-                    type: Type.STRING,
-                    description: "The full, detailed markdown-formatted answer answering the user's question, describing protocols, patch placements, and including standard wellness disclaimers.",
-                  }
+          console.log(`[Gemini] Requesting structured generation from model: ${modelName}`);
+          response = await generateContentWithSchemaFallback(
+            gemini,
+            modelName,
+            prompt,
+            "You are an expert AI advisor for LifeWave products. Provide clear, supportive, and informative answers in JSON format. Always include the standard wellness disclaimer if giving health advice.",
+            {
+              type: Type.OBJECT,
+              properties: {
+                summary: {
+                  type: Type.STRING,
+                  description: "A highly concise, 1-2 sentence quick summary of the key phototherapy patch recommendations and their main benefits.",
                 },
-                required: ["summary", "answer"],
-              }
-            }
-          });
+                answer: {
+                  type: Type.STRING,
+                  description: "The full, detailed markdown-formatted answer answering the user's question, describing protocols, patch placements, and including standard wellness disclaimers.",
+                }
+              },
+              required: ["summary", "answer"],
+            },
+            2 // Try up to 2 times with retry per model in the chain
+          );
           if (response && response.text) {
-            console.log(`[Gemini] Successfully generated structured content using model: ${modelName}`);
+            console.log(`[Gemini] Successfully retrieved response using model: ${modelName}`);
             break;
           }
         } catch (err: any) {
-          console.warn(`[Gemini] Warning: Model ${modelName} failed or unavailable:`, err.message || err);
+          console.warn(`[Gemini] Warning: Model ${modelName} fallback chain failed:`, err.message || err);
           lastError = err;
         }
       }
 
       if (!response || !response.text) {
-        throw lastError || new Error("All fallback models failed to generate content.");
+        console.warn("[Gemini] All fallback models failed or are overloaded. Falling back to local intelligence retrieval...");
+        const localResponse = generateLocalFallback(query, language, knowledgeBase);
+        return res.json(localResponse);
       }
 
       let finalAnswer = "";
@@ -119,8 +332,16 @@ User Question: ${query}`;
 
       const textOutput = response.text.trim();
       try {
-        if (textOutput.startsWith("{")) {
-          const parsed = JSON.parse(textOutput);
+        let jsonText = textOutput;
+        if (textOutput.includes("```")) {
+          const match = textOutput.match(/```(?:json)?\s*([\s\S]*?)\s*```/i);
+          if (match && match[1]) {
+            jsonText = match[1].trim();
+          }
+        }
+
+        if (jsonText.startsWith("{")) {
+          const parsed = JSON.parse(jsonText);
           finalAnswer = parsed.answer || "";
           finalSummary = parsed.summary || "";
         } else {
@@ -278,10 +499,7 @@ Sent from Daily Radiance Partner Portal.
     const vite = await createViteServer({
       server: { 
         middlewareMode: true,
-        hmr: {
-          protocol: 'wss',
-          clientPort: 443,
-        }
+        hmr: false
       },
       appType: "spa",
     });

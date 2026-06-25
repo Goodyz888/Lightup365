@@ -6,6 +6,7 @@ import SearchPage from './SearchPage';
 import Quiz from './Quiz';
 import Resources from './Resources';
 import Faq from './Faq';
+import lifewaveLogo from '../assets/images/lifewave_x39_logo_1782362582012.jpg';
 
 export default function Home() {
   const { language, socialUpdates } = useStore();
@@ -21,7 +22,7 @@ export default function Home() {
         </div>
         <div className="flex flex-col sm:flex-row items-center justify-center gap-6 mb-8 relative z-10">
           <img 
-            src="/src/assets/images/lifewave_x39_logo_1782362582012.jpg" 
+            src={lifewaveLogo} 
             alt="LifeWave X39 Logo" 
             className="w-24 h-24 md:w-28 md:h-28 rounded-full border-2 border-white dark:border-slate-700 shadow-md object-cover flex-shrink-0"
             referrerPolicy="no-referrer"

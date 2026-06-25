@@ -145,12 +145,22 @@ export default function SearchPage() {
       if (!res.ok) {
         let errMsg = 'Failed to fetch answer';
         try {
-          const errData = await res.json();
-          errMsg = errData.error || errMsg;
+          const contentType = res.headers.get('content-type');
+          if (contentType && contentType.includes('application/json')) {
+            const errData = await res.json();
+            errMsg = errData.error || errMsg;
+          } else {
+            errMsg = `Server error (Status ${res.status})`;
+          }
         } catch (_) {
           errMsg = `Server error (Status ${res.status})`;
         }
         throw new Error(errMsg);
+      }
+      
+      const contentType = res.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        throw new Error('The server returned an invalid response. This may be due to a server restart or the service starting up. Please wait a moment and try again.');
       }
       
       const data = await res.json();
